@@ -1,0 +1,11 @@
+{
+  "name": "tempahan-mpc-wilayah-utara",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "python3 scripts/assemble.py && python3 cloudflare/build.py && node --check worker/index.js && node --check cloudflare/worker.js",
+    "dev": "npm run build && node scripts/preview.mjs",
+    "test": "npm run build && node scripts/check.mjs"
+  }
+}

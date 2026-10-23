@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import worker from '../worker/index.js';
+let state=null,etag=null;
+const BUCKET={async get(){return state?{etag,json:async()=>structuredClone(state)}:null},async put(k,v,o){if(o.onlyIf.etagMatches&&o.onlyIf.etagMatches!==etag)return null;if(o.onlyIf.etagDoesNotMatch&&state)return null;state=JSON.parse(v);etag=String(state.revision);return {etag}}};
+const env={BUCKET};
+const send=(b,admin=true,origin='https://example.test')=>worker.fetch(new Request('https://example.test/api/availability',{method:'POST',headers:{'Content-Type':'application/json',origin,...(admin?{'oai-authenticated-user-email':'aisistem@mpc.gov.my'}:{})},body:JSON.stringify(b)}),env);
+const b={resource:'lelaki',from:'2026-11-01',until:'2026-11-02',status:'open',rooms:5,revision:0};
+assert.equal((await send(b,false)).status,403);assert.equal((await send(b,true,'https://evil.test')).status,403);
+assert.equal((await send({...b,rooms:15})).status,400);assert.equal((await send(b)).status,200);assert.equal(state.entries['lelaki|2026-11-02'],5);assert.equal((await send(b)).status,409);
+assert.equal((await send({...b,status:'closed',revision:1})).status,200);assert.equal(state.entries['lelaki|2026-11-01'],0);
+assert.equal((await send({...b,status:'unknown',revision:2})).status,200);assert.equal(state.entries['lelaki|2026-11-01'],undefined);
+console.log('Lulus: kawalan pentadbir, semakan Origin, had bilik, penyimpanan julat, konflik versi dan pemadaman tetapan.');

@@ -1,0 +1,13 @@
+[
+{"id":"produktiviti","name":"Dewan Produktiviti","category":"dewan","chair":350,"table":120,"day":1400,"half":1000,"extra":150,"prep":150,"image":3,"desc":"Ruang utama untuk persidangan, seminar dan program berskala besar."},
+{"id":"kualiti","name":"Dewan Kualiti","category":"dewan","chair":100,"table":80,"day":1000,"half":600,"extra":100,"image":4,"desc":"Pilihan untuk seminar, perkongsian ilmu dan pertemuan organisasi."},
+{"id":"team","name":"Bilik Team Excellence","category":"bilik","chair":60,"table":50,"day":700,"half":500,"extra":80,"image":5,"desc":"Ruang bengkel untuk kolaborasi dan pembangunan pasukan."},
+{"id":"six","name":"Bilik Six Sigma","category":"bilik","chair":40,"table":20,"day":650,"half":450,"extra":70,"image":6,"desc":"Untuk kursus, latihan kumpulan dan perbincangan berfokus."},
+{"id":"multimedia","name":"Bilik Multimedia","category":"bilik","table":20,"day":600,"half":400,"extra":70,"image":7,"desc":"Ruang latihan dan pembelajaran untuk kumpulan kecil."},
+{"id":"dayasaing","name":"Bilik Daya Saing","category":"bilik","table":20,"day":600,"image":8,"desc":"Bilik mesyuarat untuk perbincangan dan sesi kerja."},
+{"id":"makanac","name":"Dewan Makan Berhawa Dingin","category":"makan","capacity":110,"day":400,"half":200,"image":9,"desc":"Ruang makan berhawa dingin untuk melengkapkan program anda."},
+{"id":"makanterbuka","name":"Dewan Makan Terbuka","category":"makan","capacity":150,"day":350,"half":200,"image":10,"desc":"Pilihan ruang makan terbuka bagi kumpulan yang lebih besar."},
+{"id":"vip","name":"Bilik VIP","category":"penginapan","capacity":2,"night":120,"inventory":null,"image":11,"desc":"Katil queen untuk 1–2 orang. Bilangan bilik perlu disahkan dengan MPC."},
+{"id":"lelaki","name":"Asrama Lelaki","category":"penginapan","capacity":3,"night":70,"inventory":14,"image":12,"desc":"14 bilik, katil single untuk 2–3 orang sebilik."},
+{"id":"perempuan","name":"Asrama Perempuan","category":"penginapan","capacity":3,"night":70,"inventory":14,"image":12,"desc":"14 bilik, katil single untuk 2–3 orang sebilik."}
+]

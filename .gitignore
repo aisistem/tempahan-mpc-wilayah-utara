@@ -1,0 +1,9 @@
+node_modules/
+worker/
+cloudflare/worker.js
+dist/
+.sites-runtime/
+.env
+.env.*
+.dev.vars
+.wrangler/

@@ -1,0 +1,35 @@
+const ownerEmail='aisistem@mpc.gov.my';
+const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+const isAdmin=req=>(req.headers.get('oai-authenticated-user-email')||'').toLowerCase()===ownerEmail;
+const dateOK=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&new Date(s+'T00:00:00Z').toISOString().slice(0,10)===s;
+export default {async fetch(req,env){try{
+ const url=new URL(req.url),path=url.pathname;
+ if(path==='/api/session')return json({isAdmin:isAdmin(req)});
+ if(path==='/api/availability'){
+  if(!env.BUCKET)return json({error:'Rekod ketersediaan belum sedia. Sila hubungi pentadbir.'},503);
+  if(req.method==='GET'){const obj=await env.BUCKET.get('availability.json');return json(obj?await obj.json():{revision:0,entries:{}});}
+  if(req.method!=='POST')return json({error:'Kaedah tidak dibenarkan.'},405);
+  if(!isAdmin(req))return json({error:'Akses pentadbir diperlukan.'},403);
+  if(req.headers.get('origin')!==url.origin)return json({error:'Permintaan tidak sah.'},403);
+  if(!req.headers.get('content-type')?.startsWith('application/json'))return json({error:'Format tidak sah.'},415);
+  const raw=await req.text();if(raw.length>3000)return json({error:'Permintaan terlalu besar.'},413);
+  let b;try{b=JSON.parse(raw);}catch{return json({error:'Format tidak sah.'},400);}
+  const f=CATALOG.find(f=>f.id===b.resource);
+  if(!f||!dateOK(b.from)||!dateOK(b.until)||b.until<b.from||!['open','closed','unknown'].includes(b.status)||!Number.isInteger(b.revision))return json({error:'Sila semak kemudahan dan julat tarikh.'},400);
+  const days=(Date.parse(b.until)-Date.parse(b.from))/86400000+1;if(days>366)return json({error:'Had maksimum ialah 366 hari.'},400);
+  const max=f.inventory||1;let n=b.status==='closed'?0:f.night?b.rooms:1;
+  if(b.status==='open'&&(!Number.isInteger(n)||n<1||n>max))return json({error:'Bilangan bilik tidak sah.'},400);
+  const obj=await env.BUCKET.get('availability.json'),old=obj?await obj.json():{revision:0,entries:{}};
+  if(old.revision!==b.revision)return json({error:'Rekod telah berubah. Muat semula sebelum menyimpan.'},409);
+  const entries={...old.entries};for(let t=Date.parse(b.from);t<=Date.parse(b.until);t+=86400000){const k=f.id+'|'+new Date(t).toISOString().slice(0,10);if(b.status==='unknown')delete entries[k];else entries[k]=n;}
+  const result={revision:old.revision+1,entries,updatedAt:new Date().toISOString()};
+  const saved=await env.BUCKET.put('availability.json',JSON.stringify(result),{onlyIf:obj?{etagMatches:obj.etag}:{etagDoesNotMatch:'*'},httpMetadata:{contentType:'application/json'}});
+  if(!saved)return json({error:'Rekod dikemas kini serentak. Muat semula dan cuba lagi.'},409);
+  return json(result);
+ }
+ if(req.method!=='GET'&&req.method!=='HEAD')return new Response('Kaedah tidak dibenarkan',{status:405});
+ const file=FILES[path==='/'?'/index.html':path==='/admin'||path==='/admin/'?'/admin.html':path==='/dashboard'||path==='/dashboard/'?'/dashboard.html':path];
+ if(!file)return new Response('Halaman tidak ditemui',{status:404});
+ const [body,type,binary]=file;const bytes=binary?Uint8Array.from(atob(body),c=>c.charCodeAt(0)):body;
+ return new Response(req.method==='HEAD'?null:bytes,{headers:{'Content-Type':type,'Cache-Control':path.startsWith('/assets/')?'public, max-age=86400':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','Content-Security-Policy':"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'self'"}});
+ }catch{return json({error:'Ralat sementara. Sila cuba semula atau hubungi MPC.'},500);}}};
